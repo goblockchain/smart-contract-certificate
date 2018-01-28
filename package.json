@@ -1,0 +1,27 @@
+{
+  "name": "smart-contract-certificate",
+  "version": "0.0.1",
+  "description": "Project is responsible to manage the certificates in the blockchain",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "console": "truflle console"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goblockchain/smart-contract-certificate.git"
+  },
+  "keywords": [],
+  "author": "GoBlockchain",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/goblockchain/smart-contract-certificate/issues"
+  },
+  "homepage": "https://github.com/goblockchain/smart-contract-certificate#readme",
+  "dependencies": {
+    "zeppelin-solidity": "1.6.0"
+  }
+}
