@@ -1,14 +1,38 @@
+require('dotenv').load();
+require('babel-register');
+require('babel-polyfill');
+
+var Web3 = require("web3");
+var ProviderEngine = require("web3-provider-engine");
+var FiltersSubprovider = require('web3-provider-engine/subproviders/filters.js');
+var Web3Subprovider = require("web3-provider-engine/subproviders/web3.js");
+var HDWalletProvider = require("truffle-hdwallet-provider");
+
+//var mnemonic = "oil prefer pole pottery ginger stem blood hold profit inject giraffe echo";
+// No metamask, clicar no menu -> settings -> reveal seed words.
+var mnemonic = "";
+
+var path = "m/44'/60'/0'/0";
+var provider_url = "https://rinkeby.infura.io/jkYJLm4yhJuFJqGAVvMe";
+//var provider_url = "http://127.0.0.1:8545";
+
+var engine = new ProviderEngine();
+engine.addProvider(new FiltersSubprovider());
+engine.addProvider(new Web3Subprovider(new Web3.providers.HttpProvider(provider_url)));
+engine.start();
+
+
+
 module.exports = {
-  // See <http://truffleframework.com/docs/advanced/configuration>
-  // to customize your Truffle configuration!
-   networks: {
+  networks: {
     development: {
-      host: "127.0.0.1",
-      port: 7545,
-      network_id: "*",
-      gas: 6712388,
-      gasPrice: 65000000000,
-      // from: "0xf17f52151EbEF6C7334FAD080c5704D77216b732"
+      host: 'localhost',
+      port: 8545,
+      network_id: '*' // Match any network id
+    },
+    hdWallet: { // sudo truffle migrate --network hdWallet --reset
+      network_id: 4,
+      provider: new HDWalletProvider(mnemonic, provider_url, 0), //
     }
   }
-};
+}
