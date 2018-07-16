@@ -10,7 +10,7 @@ var HDWalletProvider = require("truffle-hdwallet-provider");
 
 //var mnemonic = "oil prefer pole pottery ginger stem blood hold profit inject giraffe echo";
 // No metamask, clicar no menu -> settings -> reveal seed words.
-var mnemonic = "";
+var mnemonic = "need robot message carbon excess blur fit fortune cheese guide real world";
 
 var path = "m/44'/60'/0'/0";
 var provider_url = "https://rinkeby.infura.io/jkYJLm4yhJuFJqGAVvMe";
@@ -20,8 +20,6 @@ var engine = new ProviderEngine();
 engine.addProvider(new FiltersSubprovider());
 engine.addProvider(new Web3Subprovider(new Web3.providers.HttpProvider(provider_url)));
 engine.start();
-
-
 
 module.exports = {
   networks: {
@@ -34,5 +32,8 @@ module.exports = {
       network_id: 4,
       provider: new HDWalletProvider(mnemonic, provider_url, 0), //
     }
+  },
+  compiler: {
+     solc: "0.4.19"       // Version. ex:  "0.4.20". (Default: truffle's installed solc)
   }
 }

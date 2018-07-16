@@ -9,13 +9,13 @@ contract Issuers is Institutions {
     event logNewInssuer(address _address, bytes32 institution, uint256 timestamp);
 
     // @dev adds new Issuer to valid Institution
-    function addIssuer(address _issuerAddress, bytes32 _institution) public onlyRole("GBC_ADMIN") {
+    function addIssuer(address _issuerAddress, bytes32 _institution) public onlyAdmin() {
         require(institutions[_institution].valid = true);
-        addRole(_issuerAddress, institutions[_institution].code);
+        addRole(_issuerAddress, _institution);
     }
 
     // @dev revokes access from Issuer
-    function revokeIssuer(address _issuerAddress, bytes32 _institution) public onlyRole("GBC_ADMIN") {
-        removeRole(_issuerAddress, institutions[_institution].code);
+    function revokeIssuer(address _issuerAddress, bytes32 _institution) public onlyAdmin() {
+        removeRole(_issuerAddress, _institution);
     }
 }
