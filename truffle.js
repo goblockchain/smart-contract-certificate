@@ -13,6 +13,10 @@ module.exports = {
     rinkeby: { 
       network_id: 4,
       provider: new HDWalletProvider(process.env.DEV_MNEMONIC, `https://ropsten.infura.io/${process.env.DEV_INFURA}`, 0),
+    },
+    mainnet: { 
+      network_id: 1,
+      provider: new HDWalletProvider(process.env.DEV_MNEMONIC, `https://mainnet.infura.io/${process.env.DEV_INFURA}`, 0),
     }
   },
   // compiler: {

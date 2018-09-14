@@ -1,10 +1,16 @@
 pragma solidity 0.4.24;
 
-import "./Issuers.sol";
-import "zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+contract Issuer {
+    function checkRole(address addr, bytes32 roleName) public view;
+}
+
+contract ERC20 {
+    function allowance(address owner, address spender) public view returns (uint256);
+    function transferFrom(address from, address to, uint256 value) public returns (bool);
+}
 
 /// @title Contract CertificatePrint, prints the certificates
-contract CertificatePrint is Issuers, ERC20 {
+contract CertificatePrint {
 
     // @dev Certificate data struct
     struct Certificate {
@@ -16,17 +22,17 @@ contract CertificatePrint is Issuers, ERC20 {
         uint16 courseHours;
         bool valid;
         string instructorName;
-        address instructorAddress;
-        string data;
+        address issuerAddress;
     }
 
-    // @dev Certificate data mapping for storage
     mapping (bytes32 => Certificate) public certificates;
+    mapping (bytes32 => bytes32) public certificateData;
     uint public price;
     ERC20 tokenContract;
+    Issuer accessControl;
     address wallet;
 
-    // @dev Event fired for every new certificate, to be checked to get all certificates
+    // // @dev Event fired for every new certificate, to be checked to get all certificates
     event logPrintedCertificate(
         bytes32 contractAddress, 
         string _name, 
@@ -36,9 +42,11 @@ contract CertificatePrint is Issuers, ERC20 {
         string _dates,
         uint16 _hours);
 
-    constructor (uint _price, address _token) public {
+    constructor (uint _price, address _token, address _accessControl, address _wallet) public {
         tokenContract = ERC20(_token);
+        accessControl = Issuer(_accessControl);
         price = _price;
+        wallet = _wallet;
     }
 
     function printCertificate (
@@ -49,10 +57,10 @@ contract CertificatePrint is Issuers, ERC20 {
         string _dates, 
         uint16 _hours, 
         string _instructorName, 
-        string _data
+        bytes32 _data
         ) 
         public
-        charge 
+        charge
         onlyInstitution(_institution) 
         returns (
             bytes32 certificateAddress
@@ -61,7 +69,8 @@ contract CertificatePrint is Issuers, ERC20 {
         certificateAddress = keccak256(abi.encodePacked(block.number, now, msg.data));
 
         // create certificate data
-        certificates[certificateAddress] = Certificate(_name, _email, _institution, _course, _dates, _hours, true, _instructorName, msg.sender, _data);
+        certificates[certificateAddress] = Certificate(_name, _email, _institution, _course, _dates, _hours, true, _instructorName, msg.sender);
+        certificateData[certificateAddress] = _data;
 
         // creates the event, to be used to query all the certificates
         emit logPrintedCertificate(certificateAddress, _name, _email, _institution, _course, _dates, _hours);
@@ -80,10 +89,30 @@ contract CertificatePrint is Issuers, ERC20 {
         tokenContract = ERC20(_newAddress);
     }
 
+    function getTokenAddress() public view returns (address) {
+        return(tokenContract);
+    }
+
+    function issuerAddress() public view returns (address) {
+        return(accessControl);
+    }
+
     // @dev Modifier: allows only if the user has access to institution that issued the certificate
     modifier onlyCertificateIssuer(bytes32 _certificateAddress) {
         bytes32 institution = certificates[_certificateAddress].institution;
-        checkRole(msg.sender, institution);
+        accessControl.checkRole(msg.sender, institution);
+        _;
+    }
+
+    // @dev Modifier: allows only if the user has access to institution that issued the certificate
+    modifier onlyAdmin() {
+        accessControl.checkRole(msg.sender, bytes32(address(accessControl)));
+        _;
+    }
+
+    // @dev Modifier: allows only if the user has access to institution that issued the certificate
+    modifier onlyInstitution(bytes32 _institution) {
+        accessControl.checkRole(msg.sender, _institution);
         _;
     }
 
