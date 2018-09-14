@@ -1,4 +1,4 @@
-pragma solidity 0.4.19;
+pragma solidity 0.4.24;
 
 import "./RBAC.sol";
 
@@ -18,18 +18,18 @@ contract Institutions is RBAC {
     mapping (bytes32 => Institution) public institutions;
 
     // @dev Event fired for every new institution, to be checked to get all institutions
-    event logNewInstitution(bytes32 hash, string name, uint256 timestamp);
+    event logNewInstitution(bytes32 _hash, string name, uint256 timestamp);
 
     function addInstitution (string _name, string _code) public onlyAdmin() returns (bytes32 institutionHash) {
 
         // creates institution hash
-        institutionHash = keccak256(block.number, now, msg.data);
+        institutionHash = keccak256(abi.encodePacked(block.number, now, msg.data));
 
         // create institution data
         institutions[institutionHash] = Institution(_code, _name, now, now + 31536000, true);
 
         // fires the event, to be used to query all the institutions
-        logNewInstitution(institutionHash, _name, now);
+        emit logNewInstitution(institutionHash, _name, now);
     }
 
     // @dev Invalidates an institution

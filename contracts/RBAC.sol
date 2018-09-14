@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity 0.4.24;
 
 import "./Roles.sol";
 
@@ -25,12 +25,12 @@ contract RBAC {
   /**
    * A constant role name for indicating admins.
    */
-  bytes32 public constant ROLE_ADMIN = keccak256(address(this));
+  bytes32 public constant ROLE_ADMIN = keccak256(abi.encodePacked(address(this)));
 
   /**
    * @dev constructor. Sets msg.sender as admin by default
    */
-  function RBAC()
+  constructor()
     public
   {
     addRole(msg.sender, ROLE_ADMIN);
@@ -96,7 +96,7 @@ contract RBAC {
     internal
   {
     roles[roleName].add(addr);
-    RoleAdded(addr, roleName);
+    emit RoleAdded(addr, roleName);
   }
 
   /**
@@ -108,7 +108,7 @@ contract RBAC {
     internal
   {
     roles[roleName].remove(addr);
-    RoleRemoved(addr, roleName);
+    emit RoleRemoved(addr, roleName);
   }
 
   /**
@@ -131,26 +131,4 @@ contract RBAC {
     checkRole(msg.sender, ROLE_ADMIN);
     _;
   }
-
-  /**
-   * @dev modifier to scope access to a set of roles (uses msg.sender as addr)
-   * @param roleNames the names of the roles to scope access to
-   * // reverts
-   *
-   * @TODO - when solidity supports dynamic arrays as arguments to modifiers, provide this
-   *  see: https://github.com/ethereum/solidity/issues/2467
-   */
-  // modifier onlyRoles(string[] roleNames) {
-  //     bool hasAnyRole = false;
-  //     for (uint8 i = 0; i < roleNames.length; i++) {
-  //         if (hasRole(msg.sender, roleNames[i])) {
-  //             hasAnyRole = true;
-  //             break;
-  //         }
-  //     }
-
-  //     require(hasAnyRole);
-
-  //     _;
-  // }
 }

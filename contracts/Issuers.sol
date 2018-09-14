@@ -1,4 +1,4 @@
-pragma solidity 0.4.19;
+pragma solidity 0.4.24;
 
 import "./Institutions.sol";
 
@@ -10,7 +10,7 @@ contract Issuers is Institutions {
 
     // @dev adds new Issuer to valid Institution
     function addIssuer(address _issuerAddress, bytes32 _institution) public onlyAdmin() {
-        require(institutions[_institution].valid = true);
+        require(institutions[_institution].valid = true, "Institution inactive or invalid.");
         addRole(_issuerAddress, _institution);
     }
 
