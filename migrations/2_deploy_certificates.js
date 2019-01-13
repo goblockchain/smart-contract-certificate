@@ -17,8 +17,7 @@ var TokenMock = artifacts.require("./TokenMock.sol");
         const issuers = await deployer.deploy(Issuers)
 
         /* print */
-        const print = await deployer.deploy(CertificatePrint, 100000000000000000, token.address, issuers.address, wallet)
-
+        const print = await deployer.deploy(CertificatePrint, "100000000000000000", token.address, issuers.address, wallet)
 
         await token.faucet()
         await token.faucet()
@@ -35,13 +34,23 @@ var TokenMock = artifacts.require("./TokenMock.sol");
         const certificate = await print.printCertificate (
             "Fábio Hildebrand", 
             "fabiohildebrand@gmail.com", 
+            "0x230E277B1A6B36d56Da0F143Fe73ABdA7a926dbb",
             institution.logs[0].args._hash,
             "Solidity Hello World",
             "1 de Outubro de 2018",
             "6",
-            "Fábio Hildebrand",
-            0x0)
+            "0x0")
         console.log(certificate.logs[0].args)
+
+        await print.printCertificate (
+            "Fábio Hildebrand", 
+            "fabiohildebrand@gmail.com", 
+            "0x230E277B1A6B36d56Da0F143Fe73ABdA7a926dbb",
+            institution.logs[0].args._hash,
+            "Solidity Hello World Advanced",
+            "1 de Novembro de 2018",
+            "8",
+            "0x0")
   
         return true
     } catch (err) {
@@ -52,12 +61,15 @@ var TokenMock = artifacts.require("./TokenMock.sol");
   const deployContracts = async (deployer, accounts) => {
     try {
 
+        /* token */
+        const token = await deployer.deploy(TokenMock)
+
         /* issuers */
         const issuers = await deployer.deploy(Issuers)
 
 
         /* print */
-        const print = await deployer.deploy(CertificatePrint, 100000000000000000, "0x... TOKEN ADDRESS", "0x... WALLET ADDRESS")
+        const print = await deployer.deploy(CertificatePrint, "100000000000000000", token.address, issuers.address, "0x230E277B1A6B36d56Da0F143Fe73ABdA7a926dbb")
 
         return true
     } catch (err) {
@@ -68,7 +80,7 @@ var TokenMock = artifacts.require("./TokenMock.sol");
   
   module.exports = (deployer, network, accounts) => {
       deployer.then(async () => {
-          if (deployer.network == "development" || deployer.network == "rinkeby")
+          if (deployer.network == "development")
             await deployContractsDevelopment(deployer, accounts)
           else
             await deployContracts(deployer, accounts)

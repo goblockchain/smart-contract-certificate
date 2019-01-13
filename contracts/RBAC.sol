@@ -25,7 +25,7 @@ contract RBAC {
   /**
    * A constant role name for indicating admins.
    */
-  bytes32 public constant ROLE_ADMIN = keccak256(abi.encodePacked(address(this)));
+  bytes32 public ROLE_ADMIN = keccak256(abi.encodePacked(address(this)));
 
   /**
    * @dev constructor. Sets msg.sender as admin by default

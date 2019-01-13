@@ -16,12 +16,12 @@ contract CertificatePrint {
     struct Certificate {
         string name;
         string email;
+        address ownerAddress;
         bytes32 institution;
         string course;
         string dates;
         uint16 courseHours;
         bool valid;
-        string instructorName;
         address issuerAddress;
     }
 
@@ -34,13 +34,15 @@ contract CertificatePrint {
 
     // // @dev Event fired for every new certificate, to be checked to get all certificates
     event logPrintedCertificate(
-        bytes32 contractAddress, 
-        string _name, 
+        bytes32 certificateHash, 
+        string name, 
         string email, 
-        bytes32 _institution, 
-        string _course, 
-        string _dates,
-        uint16 _hours);
+        address ownerAddress,
+        bytes32 institution, 
+        string course, 
+        string dates,
+        uint16 _hours
+    );
 
     constructor (uint _price, address _token, address _accessControl, address _wallet) public {
         tokenContract = ERC20(_token);
@@ -52,11 +54,11 @@ contract CertificatePrint {
     function printCertificate (
         string _name, 
         string _email, 
+        address _ownerAddress,
         bytes32 _institution, 
         string _course, 
         string _dates, 
         uint16 _hours, 
-        string _instructorName, 
         bytes32 _data
         ) 
         public
@@ -69,11 +71,11 @@ contract CertificatePrint {
         certificateAddress = keccak256(abi.encodePacked(block.number, now, msg.data));
 
         // create certificate data
-        certificates[certificateAddress] = Certificate(_name, _email, _institution, _course, _dates, _hours, true, _instructorName, msg.sender);
+        certificates[certificateAddress] = Certificate(_name, _email, _ownerAddress, _institution, _course, _dates, _hours, true, msg.sender);
         certificateData[certificateAddress] = _data;
 
         // creates the event, to be used to query all the certificates
-        emit logPrintedCertificate(certificateAddress, _name, _email, _institution, _course, _dates, _hours);
+        emit logPrintedCertificate(certificateAddress, _name, _email, _ownerAddress, _institution, _course, _dates, _hours);
     }
 
     // @dev Invalidates a deployed certificate
