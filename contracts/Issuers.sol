@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.0;
 
 import "./Institutions.sol";
 
@@ -19,3 +19,4 @@ contract Issuers is Institutions {
         removeRole(_issuerAddress, _institution);
     }
 }
+
