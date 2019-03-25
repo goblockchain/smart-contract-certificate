@@ -1,22 +1,52 @@
 pragma solidity 0.5.0;
 
-import "./Institutions.sol";
+import "./RBAC.sol";
+//"Henrique", "teste@gmail.com", "0xca35b7d915458ef540ade6068dfe2f44e8fa733c", "0xb2040755f478302827573666772a96ee11e1f6097871a7e7a89b77b6ca5bc525", "GOLang", "12/12/2019", 12, "0x22"
+//  @devManages institutions allowed to issue certificates
+contract Institutions is RBAC {
 
-//  @devManages users allowed to issue certificates from a determined institution
-contract Issuers is Institutions {
-
-    // @dev Event fired for every new issuer, to be checked to get all issuers
-    event logNewInssuer(address _address, bytes32 institution, uint256 timestamp);
-
-    // @dev adds new Issuer to valid Institution
-    function addIssuer(address _issuerAddress, bytes32 _institution) public onlyAdmin() {
-        require(institutions[_institution].valid = true, "Institution inactive or invalid.");
-        addRole(_issuerAddress, _institution);
+    // @dev Institution data struct
+    struct Institution {
+        string code;
+        string name;
+        uint256 validFrom;
+        uint256 validTo;
+        bool valid;
     }
 
-    // @dev revokes access from Issuer
-    function revokeIssuer(address _issuerAddress, bytes32 _institution) public onlyAdmin() {
-        removeRole(_issuerAddress, _institution);
+    // @dev Institution data mapping for storage
+    mapping (bytes32 => Institution) public institutions;
+    mapping (bytes32 => bytes32) public institutionsData;
+
+    // @dev Event fired for every new institution, to be checked to get all institutions
+    event logNewInstitution(bytes32 _hash, string name, uint256 timestamp);
+
+    function addInstitution (string memory _name, string memory _code, bytes32 _data) public onlyAdmin() returns (bytes32 institutionHash) {
+
+        // creates institution hash
+        institutionHash = keccak256(abi.encodePacked(block.number, now, msg.data));
+
+        // create institution data
+        institutions[institutionHash] = Institution(_code, _name, now, now + 31536000, true);
+
+        institutionsData[institutionHash] = _data;
+ 
+        // fires the event, to be used to query all the institutions
+        emit logNewInstitution(institutionHash, _name, now);
     }
+
+    // @dev Invalidates an institution
+    function invalidateInstitution(bytes32 _institutionHash) public onlyAdmin() {
+        institutions[_institutionHash].valid = false;
+        institutions[_institutionHash].validTo = now;
+        removeRole(msg.sender, _institutionHash);
+        
+    }
+
+    // @dev Modifier to allow only users from a given institution to access functions
+    modifier onlyInstitution(bytes32 _institutionHash) {
+        checkRole(msg.sender, _institutionHash);
+        _;
+    }
+
 }
-
