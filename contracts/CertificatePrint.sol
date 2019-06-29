@@ -1,7 +1,9 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.10;
 
 contract Issuer {
+
     function checkRole(address addr, bytes32 roleName) public view;
+    function isInstitutionValid(bytes32 _institutionHash) public view returns (bool);
 }
 
 contract ERC20 {
@@ -34,11 +36,11 @@ contract CertificatePrint {
 
     // // @dev Event fired for every new certificate, to be checked to get all certificates
     event logPrintedCertificate(
-        bytes32 contractAddress, 
-        string _name, 
-        string email, 
-        bytes32 _institution, 
-        string _course, 
+        bytes32 _contractAddress,
+        string _name,
+        string _email,
+        bytes32 _institution,
+        string _course,
         string _dates,
         uint16 _hours);
 
@@ -50,18 +52,18 @@ contract CertificatePrint {
     }
 
     function printCertificate (
-        string _name, 
-        string _email, 
-        bytes32 _institution, 
-        string _course, 
-        string _dates, 
-        uint16 _hours, 
-        string _instructorName, 
+        string memory _name,
+        string memory _email,
+        bytes32 _institution,
+        string memory _course,
+        string memory _dates,
+        uint16 _hours,
+        string memory _instructorName,
         bytes32 _data
-        ) 
+        )
         public
         charge
-        onlyInstitution(_institution) 
+        onlyInstitution(_institution)
         returns (
             bytes32 certificateAddress
             ) {
@@ -77,7 +79,7 @@ contract CertificatePrint {
     }
 
     // @dev Invalidates a deployed certificate
-    function invalidateCertificate(bytes32 _certificateAddress) external onlyCertificateIssuer(_certificateAddress) {
+    function invalidateCertificate(bytes32 _certificateAddress) external onlyCertificateIssuer(_certificateAddress) charge {
         certificates[_certificateAddress].valid = false;
     }
 
@@ -90,11 +92,11 @@ contract CertificatePrint {
     }
 
     function getTokenAddress() public view returns (address) {
-        return(tokenContract);
+        return(address(tokenContract));
     }
 
     function issuerAddress() public view returns (address) {
-        return(accessControl);
+        return(address(accessControl));
     }
 
     // @dev Modifier: allows only if the user has access to institution that issued the certificate
@@ -106,13 +108,14 @@ contract CertificatePrint {
 
     // @dev Modifier: allows only if the user has access to institution that issued the certificate
     modifier onlyAdmin() {
-        accessControl.checkRole(msg.sender, bytes32(address(accessControl)));
+        accessControl.checkRole(msg.sender, bytes32("admin"));
         _;
     }
 
     // @dev Modifier: allows only if the user has access to institution that issued the certificate
     modifier onlyInstitution(bytes32 _institution) {
         accessControl.checkRole(msg.sender, _institution);
+        require(accessControl.isInstitutionValid(_institution), "Invalid institution");
         _;
     }
 
