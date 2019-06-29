@@ -2,7 +2,10 @@ pragma solidity 0.5.10;
 
 import "./RBAC.sol";
 
-//  @devManages institutions allowed to issue certificates
+/**
+* @title Institutions
+* @dev Manages institutions allowed to issue certificates
+*/
 contract Institutions is RBAC {
 
     // @dev Institution data struct
@@ -20,6 +23,11 @@ contract Institutions is RBAC {
     // @dev Event fired for every new institution, to be checked to get all institutions
     event logNewInstitution(bytes32 _hash, string _code, string _name, uint256 _timestamp);
 
+    /**
+    * @dev Add Institution
+    * @param _name Name of the institution
+    * @param _code Short name (Code)
+    */
     function addInstitution (
         string memory _name,
         string memory _code
@@ -35,12 +43,19 @@ contract Institutions is RBAC {
         emit logNewInstitution(institutionHash, _code, _name, now);
     }
 
-    // @dev Invalidates an institution
+    /**
+    * @dev Invalidates an institution
+    * @param _institutionHash Institution hash
+    */
     function invalidateInstitution(bytes32 _institutionHash) public onlyAdmin() {
         institutions[_institutionHash].valid = false;
         institutions[_institutionHash].validTo = now;
     }
 
+    /**
+    * @dev Returnst true if institution is valid
+    * @param _institutionHash Institution hash
+    */
     function isInstitutionValid(bytes32 _institutionHash) public view returns (bool) {
         return institutions[_institutionHash].valid == true && institutions[_institutionHash].validTo >= now;
     }
