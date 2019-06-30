@@ -24,9 +24,13 @@
   "dependencies": {
     "babel-polyfill": "^6.26.0",
     "babel-register": "^6.26.0",
-    "openzeppelin-solidity": "^2.0.0-rc.1",
+    "openzeppelin-solidity": "^2.3.0",
+    "sha3": "^2.0.4",
     "solc": "^0.4.19",
+    "solidity-parser-sc": "^0.4.12",
+    "truffle-assertions": "^0.9.1",
     "truffle-hdwallet-provider": "0.0.3",
+    "web3": "^1.0.0-beta.32",
     "zeppelin-solidity": "1.6.0"
   }
 }

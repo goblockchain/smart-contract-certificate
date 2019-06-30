@@ -1,15 +1,27 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.10;
 
-contract Issuer {
-    function checkRole(address addr, bytes32 roleName) public view;
+/**
+* @title Issuer Interface
+* @dev Only functions used by CertificatePrint are included
+*/
+interface Issuer {
+    function checkRole(address addr, bytes32 roleName) external view;
+    function isInstitutionValid(bytes32 _institutionHash) external view returns (bool);
 }
 
-contract ERC20 {
-    function allowance(address owner, address spender) public view returns (uint256);
-    function transferFrom(address from, address to, uint256 value) public returns (bool);
+/**
+* @title ERC20
+* @dev Only functions used by CertificatePrint are included
+*/
+interface ERC20 {
+    function allowance(address owner, address spender) external view returns (uint256);
+    function transferFrom(address from, address to, uint256 value) external returns (bool);
 }
 
-/// @title Contract CertificatePrint, prints the certificates
+/**
+* @title CertificatePrint
+* @dev Prints the certificates
+*/
 contract CertificatePrint {
 
     // @dev Certificate data struct
@@ -32,16 +44,23 @@ contract CertificatePrint {
     Issuer accessControl;
     address wallet;
 
-    // // @dev Event fired for every new certificate, to be checked to get all certificates
+    // @dev Event fired for every new certificate, to be checked to get all certificates
     event logPrintedCertificate(
-        bytes32 contractAddress, 
-        string _name, 
-        string email, 
-        bytes32 _institution, 
-        string _course, 
+        bytes32 _contractAddress,
+        string _name,
+        string _email,
+        bytes32 _institution,
+        string _course,
         string _dates,
         uint16 _hours);
 
+    /**
+    * @dev Constructor, sets price, token, wallet and access control state vars
+    * @param _price Price per certificate printed/invalidated
+    * @param _token Token used to pay for certificates
+    * @param _accessControl Contract that manages issuers and institutions
+    * @param _wallet Address to which payments are transfered
+    */
     constructor (uint _price, address _token, address _accessControl, address _wallet) public {
         tokenContract = ERC20(_token);
         accessControl = Issuer(_accessControl);
@@ -49,19 +68,30 @@ contract CertificatePrint {
         wallet = _wallet;
     }
 
+    /**
+    * @dev Prints a Certificate
+    * @param _name Price per certificate printed/invalidated
+    * @param _email Token used to pay for certificates
+    * @param _institution institution issuing the certificate
+    * @param _course Course
+    * @param _dates Dates
+    * @param _hours Hours
+    * @param _instructorName Instructor Name
+    * @param _data Anything goes
+    */
     function printCertificate (
-        string _name, 
-        string _email, 
-        bytes32 _institution, 
-        string _course, 
-        string _dates, 
-        uint16 _hours, 
-        string _instructorName, 
+        string memory _name,
+        string memory _email,
+        bytes32 _institution,
+        string memory _course,
+        string memory _dates,
+        uint16 _hours,
+        string memory _instructorName,
         bytes32 _data
-        ) 
+        )
         public
         charge
-        onlyInstitution(_institution) 
+        onlyInstitution(_institution)
         returns (
             bytes32 certificateAddress
             ) {
@@ -76,25 +106,42 @@ contract CertificatePrint {
         emit logPrintedCertificate(certificateAddress, _name, _email, _institution, _course, _dates, _hours);
     }
 
-    // @dev Invalidates a deployed certificate
-    function invalidateCertificate(bytes32 _certificateAddress) external onlyCertificateIssuer(_certificateAddress) {
+    /**
+    * @dev Invalidates a certificate
+    * @param _certificateAddress Address of the certificate to be invalidated
+    */
+    function invalidateCertificate(bytes32 _certificateAddress) external onlyCertificateIssuer(_certificateAddress) charge {
         certificates[_certificateAddress].valid = false;
     }
 
+    /**
+    * @dev Updates price
+    * @param _newPrice new Price (same decimal places as the token)
+    */
     function updatePrice(uint _newPrice) public onlyAdmin {
         price = _newPrice;
     }
 
+    /**
+    * @dev Updates token address
+    * @param _newAddress new Token Address
+    */
     function updateToken(address _newAddress) public onlyAdmin {
         tokenContract = ERC20(_newAddress);
     }
 
+    /**
+    * @dev View token address
+    */
     function getTokenAddress() public view returns (address) {
-        return(tokenContract);
+        return(address(tokenContract));
     }
 
-    function issuerAddress() public view returns (address) {
-        return(accessControl);
+    /**
+    * @dev Access Control Address
+    */
+    function accessControlAddress() public view returns (address) {
+        return(address(accessControl));
     }
 
     // @dev Modifier: allows only if the user has access to institution that issued the certificate
@@ -106,13 +153,14 @@ contract CertificatePrint {
 
     // @dev Modifier: allows only if the user has access to institution that issued the certificate
     modifier onlyAdmin() {
-        accessControl.checkRole(msg.sender, bytes32(address(accessControl)));
+        accessControl.checkRole(msg.sender, bytes32("admin"));
         _;
     }
 
     // @dev Modifier: allows only if the user has access to institution that issued the certificate
     modifier onlyInstitution(bytes32 _institution) {
         accessControl.checkRole(msg.sender, _institution);
+        require(accessControl.isInstitutionValid(_institution), "Invalid institution");
         _;
     }
 

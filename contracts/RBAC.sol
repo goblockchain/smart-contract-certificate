@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.10;
 
 import "./Roles.sol";
 
@@ -25,7 +25,7 @@ contract RBAC {
   /**
    * A constant role name for indicating admins.
    */
-  bytes32 public constant ROLE_ADMIN = keccak256(abi.encodePacked(address(this)));
+  bytes32 public constant ROLE_ADMIN = bytes32("admin");
 
   /**
    * @dev constructor. Sets msg.sender as admin by default
@@ -61,30 +61,6 @@ contract RBAC {
     returns (bool)
   {
     return roles[roleName].has(addr);
-  }
-
-  /**
-   * @dev add a role to an address
-   * @param addr address
-   * @param roleName the name of the role
-   */
-  function adminAddRole(address addr, bytes32 roleName)
-    onlyAdmin
-    public
-  {
-    addRole(addr, roleName);
-  }
-
-  /**
-   * @dev remove a role from an address
-   * @param addr address
-   * @param roleName the name of the role
-   */
-  function adminRemoveRole(address addr, bytes32 roleName)
-    onlyAdmin
-    public
-  {
-    removeRole(addr, roleName);
   }
 
   /**
